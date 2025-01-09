@@ -21,7 +21,7 @@ struct EncryptedKey {
 struct Config {
     keys: Vec<EncryptedKey>,
     version: u8, // For future schema changes
-    refresh_interval: Option<u64>, // Refresh interval in seconds
+    pub refresh_interval: Option<u64>, // Refresh interval in seconds
 }
 
 #[derive(Debug)]
