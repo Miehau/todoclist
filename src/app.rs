@@ -26,6 +26,7 @@ pub struct App {
     pub todoist_client: Option<TodoistClient>,
     /// Tasks from Todoist
     pub tasks: Vec<Task>,
+    pub refresh_interval: u64,
 }
 
 impl Default for App {
