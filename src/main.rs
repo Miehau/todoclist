@@ -41,15 +41,7 @@ async fn main() -> AppResult<()> {
         // Handle events.
         match tui.events.next().await? {
             Event::Tick => {
-                app.tick();
-                // Check for async events
-                while let Ok(event) = app.event_receiver.try_recv() {
-                    match event {
-                        AppEvent::TasksUpdated(tasks) => {
-                            app.pending_tasks = Some(tasks);
-                        }
-                    }
-                }
+                app.tick().await;
             }
             Event::Key(key_event) => handle_key_events(key_event, &mut app),
             Event::Mouse(_) => {}

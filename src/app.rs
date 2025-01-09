@@ -1,4 +1,4 @@
-use std::{error, sync::mpsc, time::{SystemTime, UNIX_EPOCH}};
+use std::{error, time::{SystemTime, UNIX_EPOCH}};
 use ratatui::widgets::ListState;
 use crate::config::ApiKeyManager;
 use crate::todoist::{TodoistClient, Task};
@@ -7,18 +7,9 @@ use crate::todoist::{TodoistClient, Task};
 pub type AppResult<T> = Result<T, Box<dyn error::Error>>;
 
 /// Application.
-#[derive(Debug)]
-pub enum AppEvent {
-    TasksUpdated(Vec<Task>),
-}
-
 pub struct App {
     /// Is the application running?
     pub running: bool,
-    /// Channel for receiving async events
-    event_receiver: mpsc::Receiver<AppEvent>,
-    /// Channel for sending async events
-    event_sender: mpsc::Sender<AppEvent>,
     /// counter
     pub counter: u8,
     pub list_state: ListState,
@@ -36,7 +27,6 @@ pub struct App {
     pub tasks: Vec<Task>,
     pub refresh_interval: u64,
     last_refresh: u64,
-    pending_tasks: Option<Vec<Task>>,
 }
 
 impl Default for App {
@@ -53,7 +43,6 @@ impl Default for App {
             tasks: Vec::new(),
             refresh_interval: 10, // Default to 10 seconds
             last_refresh: 0,
-            pending_tasks: None,
         }
     }
 }
@@ -61,12 +50,7 @@ impl Default for App {
 impl App {
     /// Constructs a new instance of [`App`].
     pub fn new() -> Self {
-        let (sender, receiver) = mpsc::channel();
-        let mut app = Self {
-            event_receiver: receiver,
-            event_sender: sender,
-            ..Self::default()
-        };
+        let mut app = Self::default();
         // Check if we have a saved API key
         if let Ok(key) = app.api_key_manager.load_api_key("todoist") {
             app.api_key = Some(key.clone());
@@ -95,35 +79,21 @@ impl App {
     }
 
     /// Handles the tick event of the terminal.
-    pub fn tick(&mut self) {
+    pub async fn tick(&mut self) {
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
             
-        // Check if we have pending tasks to merge
-        if let Some(new_tasks) = self.pending_tasks.take() {
-            self.update_tasks(new_tasks);
-        }
-            
         // Check if it's time to refresh
         if now - self.last_refresh >= self.refresh_interval {
             if let Some(client) = &self.todoist_client {
-                // Clone what we need for the async task
-                let client = client.clone();
-                let sender = self.event_sender.clone();
-                
-                // Spawn a new async task to refresh
-                tokio::spawn(async move {
-                    match client.get_inbox_tasks().await {
-                        Ok(tasks) => {
-                            if let Err(e) = sender.send(AppEvent::TasksUpdated(tasks)) {
-                                eprintln!("Failed to send updated tasks: {}", e);
-                            }
-                        }
-                        Err(e) => eprintln!("Failed to refresh tasks: {}", e),
+                match client.get_inbox_tasks().await {
+                    Ok(tasks) => {
+                        self.update_tasks(tasks);
                     }
-                });
+                    Err(e) => eprintln!("Failed to refresh tasks: {}", e),
+                }
             }
             self.last_refresh = now;
         }
