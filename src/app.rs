@@ -58,7 +58,7 @@ impl App {
             
             // Load refresh interval from config if available
             if let Ok(config) = app.api_key_manager.load_config() {
-                app.refresh_interval = config.refresh_interval.unwrap_or(10); // Default to 10 seconds
+                app.refresh_interval = config.refresh_interval()
             }
         }
         app
