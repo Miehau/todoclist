@@ -37,7 +37,12 @@ impl TodoistClient {
             .send()
             .await?;
 
-        let tasks: Vec<Task> = response.json().await?;
+        // Print raw response for debugging
+        let raw_json = response.text().await?;
+        println!("Raw API response:\n{}", raw_json);
+
+        // Try to parse the JSON
+        let tasks: Vec<Task> = serde_json::from_str(&raw_json)?;
         Ok(tasks)
     }
 }
