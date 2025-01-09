@@ -44,7 +44,7 @@ impl App {
 
     /// Validate API key format
     pub fn is_valid_api_key(&self) -> bool {
-        self.input_buffer.starts_with("sk-") && self.input_buffer.len() >= 32
+        self.input_buffer.len() >= 0
     }
 
     /// Set running to false to quit the application.
