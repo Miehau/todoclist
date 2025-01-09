@@ -8,7 +8,6 @@ pub type AppResult<T> = Result<T, Box<dyn error::Error>>;
 
 /// Application.
 #[derive(Debug)]
-#[derive(Debug)]
 pub enum AppEvent {
     TasksUpdated(Vec<Task>),
 }
