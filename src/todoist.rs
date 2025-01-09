@@ -37,6 +37,14 @@ impl TodoistClient {
             .send()
             .await?;
 
+        // Check if the request was successful
+        if !response.status().is_success() {
+            let status = response.status();
+            let error_body = response.text().await?;
+            eprintln!("API request failed with status {}: {}", status, error_body);
+            return Err(format!("API request failed: {}", status).into());
+        }
+
         // Print raw response for debugging
         let raw_json = response.text().await?;
         println!("Raw API response:\n{}", raw_json);
