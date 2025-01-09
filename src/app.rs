@@ -1,6 +1,7 @@
 use std::error;
 use ratatui::widgets::ListState;
 use crate::config::ApiKeyManager;
+use crate::todoist::{TodoistClient, Task};
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -21,6 +22,10 @@ pub struct App {
     pub api_key: Option<String>,
     /// API key manager
     pub api_key_manager: ApiKeyManager,
+    /// Todoist client
+    pub todoist_client: Option<TodoistClient>,
+    /// Tasks from Todoist
+    pub tasks: Vec<Task>,
 }
 
 impl Default for App {
@@ -43,10 +48,19 @@ impl App {
         let mut app = Self::default();
         // Check if we have a saved API key
         if let Ok(key) = app.api_key_manager.load_api_key("todoist") {
-            app.api_key = Some(key);
+            app.api_key = Some(key.clone());
+            app.todoist_client = Some(TodoistClient::new(key));
             app.onboarding_complete = true;
         }
         app
+    }
+
+    /// Load tasks from Todoist
+    pub async fn load_tasks(&mut self) -> AppResult<()> {
+        if let Some(client) = &self.todoist_client {
+            self.tasks = client.get_inbox_tasks().await?;
+        }
+        Ok(())
     }
 
     /// Handles the tick event of the terminal.

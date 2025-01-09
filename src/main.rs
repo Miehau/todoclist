@@ -28,6 +28,11 @@ async fn main() -> AppResult<()> {
     let mut tui = Tui::new(terminal, events);
     tui.init()?;
 
+    // Load tasks if we have an API key
+    if app.api_key.is_some() {
+        app.load_tasks().await?;
+    }
+
     // Start the main loop.
     while app.running {
         // Render the user interface.

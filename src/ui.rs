@@ -94,16 +94,17 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         return;
     }
 
-    let items = vec![
-        "First Item",
-        "Second Item",
-        "Third Item",
-        "Fourth Item",
-        "Fifth Item",
-    ]
-    .iter()
-    .map(|&i| ListItem::new(i))
-    .collect::<Vec<ListItem>>();
+    let items: Vec<ListItem> = app.tasks
+        .iter()
+        .map(|task| {
+            let content = if task.is_completed {
+                format!("✓ {}", task.content)
+            } else {
+                format!("☐ {}", task.content)
+            };
+            ListItem::new(content)
+        })
+        .collect();
 
     let list = List::new(items)
         .block(Block::bordered().title("Navigation List"))
