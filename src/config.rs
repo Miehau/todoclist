@@ -97,7 +97,7 @@ impl ApiKeyManager {
         let encrypted_data = general_purpose::STANDARD.decode(&key.value)
             .map_err(|e| format!("Failed to decode encrypted key: {}", e))?;
 
-        let nonce = general_purpose::STANDARD.decode(config.nonce)
+        let nonce = general_purpose::STANDARD.decode(&key.nonce)
             .map_err(|e| format!("Failed to decode nonce: {}", e))?;
 
         let decrypted_data = cipher.decrypt(Nonce::from_slice(&nonce), &encrypted_data[..])
