@@ -31,7 +31,7 @@ pub struct ApiKeyManager {
 
 impl ApiKeyManager {
     pub fn new() -> Self {
-        let proj_dirs = ProjectDirs::from("dev", "mmlak", "todoclist", "Todoclist")
+        let proj_dirs = ProjectDirs::from("dev", "mmlak", "todoclist")
             .expect("Could not determine config directory");
         
         let config_dir = proj_dirs.config_dir();
