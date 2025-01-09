@@ -68,7 +68,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         let instructions = if app.input_buffer.is_empty() {
             "Enter your API key"
         } else if !app.is_valid_api_key() {
-            "Invalid API key format (should start with 'sk-' and be 32+ chars)"
+            "API key cannot be empty"
         } else {
             "Press Enter to continue"
         };
