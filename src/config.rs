@@ -14,6 +14,7 @@ struct Config {
     nonce: String,
 }
 
+#[derive(Debug)]
 pub struct ApiKeyManager {
     config_path: PathBuf,
     encryption_key: [u8; 32],
@@ -21,7 +22,7 @@ pub struct ApiKeyManager {
 
 impl ApiKeyManager {
     pub fn new() -> Self {
-        let proj_dirs = ProjectDirs::from("com", "todoclist", "Todoclist")
+        let proj_dirs = ProjectDirs::from("dev", "mmlak", "todoclist", "Todoclist")
             .expect("Could not determine config directory");
         
         let config_dir = proj_dirs.config_dir();

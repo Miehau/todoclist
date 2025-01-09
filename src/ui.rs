@@ -34,7 +34,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
         // Input field with placeholder
         let display_text = if app.input_buffer.is_empty() {
-            "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".to_string()
+            "7x9y2z8w4v5q1r3t6u0o2jhbjhb2jh12nvc1h2".to_string()
         } else {
             app.input_buffer.as_str().to_string()
         };
@@ -66,7 +66,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
         // Instructions
         let instructions = if app.input_buffer.is_empty() {
-            "Enter your API key (starts with 'sk-')"
+            "Enter your API key"
         } else if !app.is_valid_api_key() {
             "Invalid API key format (should start with 'sk-' and be 32+ chars)"
         } else {
