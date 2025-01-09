@@ -86,6 +86,7 @@ impl ApiKeyManager {
             Err(_) => Config {
                 keys: Vec::new(),
                 version: 1,
+                refresh_interval: Some(10),
             },
         };
 
