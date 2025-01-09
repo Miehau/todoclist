@@ -8,6 +8,39 @@ use ratatui::{
 use crate::app::App;
 
 pub fn render(app: &mut App, frame: &mut Frame) {
+    if !app.onboarding_complete {
+        let layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(3),
+                Constraint::Length(3),
+                Constraint::Length(3),
+            ])
+            .split(frame.size());
+
+        // Title
+        frame.render_widget(
+            Paragraph::new("Welcome! Please enter your name:")
+                .block(Block::bordered())
+                .alignment(Alignment::Center),
+            layout[0],
+        );
+
+        // Input field
+        let input = Paragraph::new(app.input_buffer.as_ref())
+            .block(Block::bordered().title("Input"));
+        frame.render_widget(input, layout[1]);
+
+        // Instructions
+        frame.render_widget(
+            Paragraph::new("Press Enter to continue")
+                .block(Block::bordered())
+                .alignment(Alignment::Center),
+            layout[2],
+        );
+        return;
+    }
+
     let items = vec![
         "First Item",
         "Second Item",

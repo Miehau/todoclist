@@ -12,6 +12,10 @@ pub struct App {
     /// counter
     pub counter: u8,
     pub list_state: ListState,
+    /// Is onboarding complete?
+    pub onboarding_complete: bool,
+    /// Input buffer for onboarding
+    pub input_buffer: String,
 }
 
 impl Default for App {
@@ -20,6 +24,8 @@ impl Default for App {
             running: true,
             counter: 0,
             list_state: ListState::default(),
+            onboarding_complete: false,
+            input_buffer: String::new(),
         }
     }
 }
