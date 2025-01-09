@@ -16,7 +16,7 @@ pub struct DueDate {
     pub date: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TodoistClient {
     api_key: String,
     client: reqwest::Client,

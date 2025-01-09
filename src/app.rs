@@ -1,4 +1,4 @@
-use std::error;
+use std::{error, time::{SystemTime, UNIX_EPOCH}};
 use ratatui::widgets::ListState;
 use crate::config::ApiKeyManager;
 use crate::todoist::{TodoistClient, Task};
@@ -27,6 +27,7 @@ pub struct App {
     /// Tasks from Todoist
     pub tasks: Vec<Task>,
     pub refresh_interval: u64,
+    last_refresh: u64,
 }
 
 impl Default for App {
@@ -42,6 +43,7 @@ impl Default for App {
             todoist_client: None,
             tasks: Vec::new(),
             refresh_interval: 10, // Default to 10 seconds
+            last_refresh: 0,
         }
     }
 }
@@ -78,7 +80,28 @@ impl App {
     }
 
     /// Handles the tick event of the terminal.
-    pub fn tick(&self) {}
+    pub fn tick(&mut self) {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+            
+        if now - self.last_refresh >= self.refresh_interval {
+            if let Some(client) = &self.todoist_client {
+                // Clone the client to avoid borrowing issues
+                let client = client.clone();
+                let api_key = self.api_key.clone().unwrap_or_default();
+                
+                // Spawn a new async task to refresh
+                tokio::spawn(async move {
+                    if let Err(e) = client.get_inbox_tasks().await {
+                        eprintln!("Failed to refresh tasks: {}", e);
+                    }
+                });
+            }
+            self.last_refresh = now;
+        }
+    }
 
     /// Validate API key format
     pub fn is_valid_api_key(&self) -> bool {
