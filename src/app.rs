@@ -28,6 +28,7 @@ impl Default for App {
             list_state: ListState::default(),
             onboarding_complete: false,
             input_buffer: String::new(),
+            api_key: None,
         }
     }
 }
