@@ -26,7 +26,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) {
     }
 
     match key_event.code {
-        KeyCode::Char('q') => {
+        KeyCode::Char('q') | KeyCode::Char('c') if key_event.modifiers.contains(crossterm::event::KeyModifiers::CONTROL) => {
             app.running = false;
         }
         KeyCode::Up => {
