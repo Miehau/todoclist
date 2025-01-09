@@ -8,7 +8,7 @@ use ratatui::{
 use crate::app::App;
 
 pub fn render(app: &mut App, frame: &mut Frame) {
-    if !app.onboarding_complete {
+    if !app.onboarding_complete && app.api_key.is_none() {
         let layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([

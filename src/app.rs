@@ -40,7 +40,13 @@ impl Default for App {
 impl App {
     /// Constructs a new instance of [`App`].
     pub fn new() -> Self {
-        Self::default()
+        let mut app = Self::default();
+        // Check if we have a saved API key
+        if let Ok(key) = app.api_key_manager.load_api_key("todoist") {
+            app.api_key = Some(key);
+            app.onboarding_complete = true;
+        }
+        app
     }
 
     /// Handles the tick event of the terminal.
