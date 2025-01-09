@@ -94,17 +94,26 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         return;
     }
 
-    let items: Vec<ListItem> = app.tasks
-        .iter()
-        .map(|task| {
-            let content = if task.is_completed {
-                format!("✓ {}", task.content)
-            } else {
-                format!("☐ {}", task.content)
-            };
-            ListItem::new(content)
-        })
-        .collect();
+    // Debug: Show task count
+    let task_count = app.tasks.len();
+    let debug_info = format!("Tasks loaded: {}", task_count);
+    
+    // If no tasks, show a placeholder
+    let items: Vec<ListItem> = if app.tasks.is_empty() {
+        vec![ListItem::new("No tasks found")]
+    } else {
+        app.tasks
+            .iter()
+            .map(|task| {
+                let content = if task.is_completed {
+                    format!("✓ {}", task.content)
+                } else {
+                    format!("☐ {}", task.content)
+                };
+                ListItem::new(content)
+            })
+            .collect()
+    };
 
     let list = List::new(items)
         .block(Block::bordered().title("Navigation List"))
