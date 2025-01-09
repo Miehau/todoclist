@@ -15,6 +15,7 @@ pub mod handler;
 pub mod tui;
 pub mod ui;
 pub mod config;
+pub mod todoist;
 
 #[tokio::main]
 async fn main() -> AppResult<()> {
