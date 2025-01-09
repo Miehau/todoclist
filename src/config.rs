@@ -21,6 +21,7 @@ struct EncryptedKey {
 struct Config {
     keys: Vec<EncryptedKey>,
     version: u8, // For future schema changes
+    refresh_interval: Option<u64>, // Refresh interval in seconds
 }
 
 #[derive(Debug)]
@@ -41,6 +42,25 @@ impl ApiKeyManager {
             config_path: config_dir.join("config.json"),
             encryption_key: *b"0123456789abcdef0123456789abcdef", // TODO: Replace with proper key management
         }
+    }
+
+    pub fn save_refresh_interval(&self, interval: u64) -> Result<(), String> {
+        let mut config = self.load_config().unwrap_or_else(|_| Config {
+            keys: Vec::new(),
+            version: 1,
+            refresh_interval: None,
+        });
+
+        config.refresh_interval = Some(interval);
+        self.save_config(&config)
+    }
+
+    fn save_config(&self, config: &Config) -> Result<(), String> {
+        let json = serde_json::to_string(config)
+            .map_err(|e| format!("Failed to serialize config: {}", e))?;
+        
+        fs::write(&self.config_path, json)
+            .map_err(|e| format!("Failed to write config: {}", e))
     }
 
     pub fn save_api_key(&self, service: &str, api_key: &str) -> Result<(), String> {
@@ -78,6 +98,14 @@ impl ApiKeyManager {
         
         fs::write(&self.config_path, json)
             .map_err(|e| format!("Failed to write config: {}", e))
+    }
+
+    pub fn load_config(&self) -> Result<Config, String> {
+        let data = fs::read_to_string(&self.config_path)
+            .map_err(|e| format!("Failed to read config: {}", e))?;
+        
+        serde_json::from_str(&data)
+            .map_err(|e| format!("Failed to parse config: {}", e))
     }
 
     pub fn load_api_key(&self, service: &str) -> Result<String, String> {

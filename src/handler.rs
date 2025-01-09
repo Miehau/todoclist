@@ -35,6 +35,18 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) {
         KeyCode::Down => {
             app.next();
         }
+        KeyCode::Char('r') => {
+            // Example: Press 'r' then a number to set refresh interval
+            if let Some(interval) = key_event.modifiers.intersects(KeyModifiers::CONTROL) {
+                if let Ok(interval) = key_event.code.to_string().parse::<u64>() {
+                    if let Err(e) = app.api_key_manager.save_refresh_interval(interval) {
+                        eprintln!("Failed to save refresh interval: {}", e);
+                    } else {
+                        app.refresh_interval = interval;
+                    }
+                }
+            }
+        }
         _ => {}
     }
 }
