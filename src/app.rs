@@ -60,9 +60,7 @@ impl App {
     /// Load tasks from Todoist
     pub async fn load_tasks(&mut self) -> AppResult<()> {
         if let Some(client) = &self.todoist_client {
-            println!("Loading tasks with client...");
             self.tasks = client.get_inbox_tasks().await?;
-            println!("Loaded {} tasks", self.tasks.len());
             if self.tasks.is_empty() {
                 println!("Warning: No tasks found - check your API key and Todoist account");
             }
