@@ -94,10 +94,6 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         return;
     }
 
-    // Debug: Show task count
-    let task_count = app.tasks.len();
-    let debug_info = format!("Tasks loaded: {}", task_count);
-    
     // If no tasks, show a placeholder
     let items: Vec<ListItem> = if app.tasks.is_empty() {
         vec![ListItem::new("No tasks found")]
