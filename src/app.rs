@@ -4,7 +4,7 @@ use crate::config::ApiKeyManager;
 use crate::todoist::{TodoistClient, Task};
 
 /// Application result type.
-pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
+pub type AppResult<T> = Result<T, Box<dyn error::Error>>;
 
 /// Application.
 #[derive(Debug)]
