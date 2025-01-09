@@ -16,6 +16,8 @@ pub struct App {
     pub onboarding_complete: bool,
     /// Input buffer for onboarding
     pub input_buffer: String,
+    /// Temporary storage for API key
+    pub api_key: Option<String>,
 }
 
 impl Default for App {
@@ -38,6 +40,11 @@ impl App {
 
     /// Handles the tick event of the terminal.
     pub fn tick(&self) {}
+
+    /// Validate API key format
+    pub fn is_valid_api_key(&self) -> bool {
+        self.input_buffer.starts_with("sk-") && self.input_buffer.len() >= 32
+    }
 
     /// Set running to false to quit the application.
     pub fn quit(&mut self) {

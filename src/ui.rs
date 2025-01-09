@@ -20,10 +20,10 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
         // Title
         frame.render_widget(
-            Paragraph::new("Welcome! Please enter your name:")
+            Paragraph::new("Welcome! Please enter your API key:")
                 .block(
                     Block::bordered()
-                        .title(" Onboarding ")
+                        .title(" API Key Setup ")
                         .title_alignment(Alignment::Center)
                         .style(Style::default().fg(Color::LightBlue))
                 )
@@ -32,24 +32,60 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             layout[0],
         );
 
-        // Input field
-        let input = Paragraph::new(app.input_buffer.as_str())
+        // Input field with placeholder
+        let display_text = if app.input_buffer.is_empty() {
+            "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".to_string()
+        } else {
+            app.input_buffer.as_str().to_string()
+        };
+        
+        let input = Paragraph::new(display_text)
             .block(
                 Block::bordered()
-                    .title(" Your Name ")
+                    .title(" API Key ")
                     .title_alignment(Alignment::Center)
-                    .style(Style::default().fg(Color::LightYellow))
+                    .style(Style::default().fg(
+                        if app.input_buffer.is_empty() {
+                            Color::DarkGray
+                        } else if app.is_valid_api_key() {
+                            Color::LightGreen
+                        } else {
+                            Color::LightRed
+                        }
+                    ))
             )
-            .style(Style::default().fg(Color::Green))
+            .style(Style::default().fg(
+                if app.input_buffer.is_empty() {
+                    Color::DarkGray
+                } else {
+                    Color::White
+                }
+            ))
             .alignment(Alignment::Center);
         frame.render_widget(input, layout[1]);
 
         // Instructions
+        let instructions = if app.input_buffer.is_empty() {
+            "Enter your API key (starts with 'sk-')"
+        } else if !app.is_valid_api_key() {
+            "Invalid API key format (should start with 'sk-' and be 32+ chars)"
+        } else {
+            "Press Enter to continue"
+        };
+        
         frame.render_widget(
-            Paragraph::new("Press Enter to continue")
+            Paragraph::new(instructions)
                 .block(
                     Block::bordered()
-                        .style(Style::default().fg(Color::LightMagenta))
+                        .style(Style::default().fg(
+                            if app.input_buffer.is_empty() {
+                                Color::LightMagenta
+                            } else if !app.is_valid_api_key() {
+                                Color::Red
+                            } else {
+                                Color::LightGreen
+                            }
+                        ))
                 )
                 .alignment(Alignment::Center)
                 .style(Style::default().fg(Color::White)),

@@ -11,7 +11,8 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) {
                 app.input_buffer.pop();
             }
             KeyCode::Enter => {
-                if !app.input_buffer.is_empty() {
+                if app.is_valid_api_key() {
+                    app.api_key = Some(app.input_buffer.clone());
                     app.onboarding_complete = true;
                 }
             }
