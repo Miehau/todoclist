@@ -98,7 +98,7 @@ impl App {
     pub fn next(&mut self) {
         let i = match self.list_state.selected() {
             Some(i) => {
-                if i >= 4 {
+                if i >= self.tasks.len().saturating_sub(1) {
                     0
                 } else {
                     i + 1
@@ -113,7 +113,7 @@ impl App {
         let i = match self.list_state.selected() {
             Some(i) => {
                 if i == 0 {
-                    4
+                    self.tasks.len().saturating_sub(1)
                 } else {
                     i - 1
                 }
