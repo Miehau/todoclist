@@ -38,6 +38,8 @@ impl Default for App {
             input_buffer: String::new(),
             api_key: None,
             api_key_manager: ApiKeyManager::new(),
+            todoist_client: None,
+            tasks: Vec::new(),
         }
     }
 }
