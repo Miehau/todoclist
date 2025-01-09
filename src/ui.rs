@@ -1,7 +1,7 @@
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout},
     style::{Color, Style, Stylize},
-    widgets::{Block, BorderType, List, ListItem, Paragraph},
+    widgets::{Block, BorderType, List, ListItem, Paragraph, Wrap},
     Frame,
 };
 
@@ -21,21 +21,38 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         // Title
         frame.render_widget(
             Paragraph::new("Welcome! Please enter your name:")
-                .block(Block::bordered())
-                .alignment(Alignment::Center),
+                .block(
+                    Block::bordered()
+                        .title(" Onboarding ")
+                        .title_alignment(Alignment::Center)
+                        .style(Style::default().fg(Color::LightBlue))
+                )
+                .alignment(Alignment::Center)
+                .style(Style::default().fg(Color::White)),
             layout[0],
         );
 
         // Input field
         let input = Paragraph::new(app.input_buffer.as_ref())
-            .block(Block::bordered().title("Input"));
+            .block(
+                Block::bordered()
+                    .title(" Your Name ")
+                    .title_alignment(Alignment::Center)
+                    .style(Style::default().fg(Color::LightYellow))
+            )
+            .style(Style::default().fg(Color::Green))
+            .alignment(Alignment::Center);
         frame.render_widget(input, layout[1]);
 
         // Instructions
         frame.render_widget(
             Paragraph::new("Press Enter to continue")
-                .block(Block::bordered())
-                .alignment(Alignment::Center),
+                .block(
+                    Block::bordered()
+                        .style(Style::default().fg(Color::LightMagenta))
+                )
+                .alignment(Alignment::Center)
+                .style(Style::default().fg(Color::White)),
             layout[2],
         );
         return;
