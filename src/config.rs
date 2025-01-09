@@ -9,9 +9,18 @@ use std::fs;
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
-struct Config {
-    encrypted_key: String,
+struct EncryptedKey {
+    value: String,
     nonce: String,
+    service: String,
+    created_at: String, // ISO 8601 timestamp
+    last_used: Option<String>, // ISO 8601 timestamp
+}
+
+#[derive(Serialize, Deserialize)]
+struct Config {
+    keys: Vec<EncryptedKey>,
+    version: u8, // For future schema changes
 }
 
 #[derive(Debug)]
@@ -34,7 +43,7 @@ impl ApiKeyManager {
         }
     }
 
-    pub fn save_api_key(&self, api_key: &str) -> Result<(), String> {
+    pub fn save_api_key(&self, service: &str, api_key: &str) -> Result<(), String> {
         let cipher = Aes256Gcm::new_from_slice(&self.encryption_key)
             .map_err(|e| format!("Failed to create cipher: {}", e))?;
         
@@ -42,10 +51,27 @@ impl ApiKeyManager {
         let encrypted_data = cipher.encrypt(nonce, api_key.as_bytes())
             .map_err(|e| format!("Encryption failed: {}", e))?;
 
-        let config = Config {
-            encrypted_key: general_purpose::STANDARD.encode(encrypted_data),
+        let new_key = EncryptedKey {
+            value: general_purpose::STANDARD.encode(encrypted_data),
             nonce: general_purpose::STANDARD.encode(nonce),
+            service: service.to_string(),
+            created_at: chrono::Utc::now().to_rfc3339(),
+            last_used: None,
         };
+
+        // Try to load existing config
+        let mut config = match fs::read_to_string(&self.config_path) {
+            Ok(data) => serde_json::from_str::<Config>(&data)
+                .map_err(|e| format!("Failed to parse config: {}", e))?,
+            Err(_) => Config {
+                keys: Vec::new(),
+                version: 1,
+            },
+        };
+
+        // Remove existing key for this service if it exists
+        config.keys.retain(|k| k.service != service);
+        config.keys.push(new_key);
 
         let json = serde_json::to_string(&config)
             .map_err(|e| format!("Failed to serialize config: {}", e))?;
@@ -54,7 +80,7 @@ impl ApiKeyManager {
             .map_err(|e| format!("Failed to write config: {}", e))
     }
 
-    pub fn load_api_key(&self) -> Result<String, String> {
+    pub fn load_api_key(&self, service: &str) -> Result<String, String> {
         let data = fs::read_to_string(&self.config_path)
             .map_err(|e| format!("Failed to read config: {}", e))?;
         
@@ -64,7 +90,11 @@ impl ApiKeyManager {
         let cipher = Aes256Gcm::new_from_slice(&self.encryption_key)
             .map_err(|e| format!("Failed to create cipher: {}", e))?;
 
-        let encrypted_data = general_purpose::STANDARD.decode(config.encrypted_key)
+        let key = config.keys.iter()
+            .find(|k| k.service == service)
+            .ok_or_else(|| format!("No API key found for service: {}", service))?;
+
+        let encrypted_data = general_purpose::STANDARD.decode(&key.value)
             .map_err(|e| format!("Failed to decode encrypted key: {}", e))?;
 
         let nonce = general_purpose::STANDARD.decode(config.nonce)
