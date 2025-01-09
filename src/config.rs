@@ -18,10 +18,16 @@ struct EncryptedKey {
 }
 
 #[derive(Serialize, Deserialize)]
-struct Config {
+pub struct Config {
     keys: Vec<EncryptedKey>,
     version: u8, // For future schema changes
-    pub refresh_interval: Option<u64>, // Refresh interval in seconds
+    refresh_interval: Option<u64>, // Refresh interval in seconds
+}
+
+impl Config {
+    pub fn refresh_interval(&self) -> u64 {
+        self.refresh_interval.unwrap_or(10)
+    }
 }
 
 #[derive(Debug)]
