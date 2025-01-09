@@ -12,8 +12,12 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) {
             }
             KeyCode::Enter => {
                 if app.is_valid_api_key() {
-                    app.api_key = Some(app.input_buffer.clone());
-                    app.onboarding_complete = true;
+                    if let Err(e) = app.api_key_manager.save_api_key(&app.input_buffer) {
+                        eprintln!("Failed to save API key: {}", e);
+                    } else {
+                        app.api_key = Some(app.input_buffer.clone());
+                        app.onboarding_complete = true;
+                    }
                 }
             }
             _ => {}

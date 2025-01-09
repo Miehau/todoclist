@@ -1,5 +1,6 @@
 use std::error;
 use ratatui::widgets::ListState;
+use crate::config::ApiKeyManager;
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -18,6 +19,8 @@ pub struct App {
     pub input_buffer: String,
     /// Temporary storage for API key
     pub api_key: Option<String>,
+    /// API key manager
+    pub api_key_manager: ApiKeyManager,
 }
 
 impl Default for App {
@@ -29,6 +32,7 @@ impl Default for App {
             onboarding_complete: false,
             input_buffer: String::new(),
             api_key: None,
+            api_key_manager: ApiKeyManager::new(),
         }
     }
 }
@@ -44,7 +48,7 @@ impl App {
 
     /// Validate API key format
     pub fn is_valid_api_key(&self) -> bool {
-        self.input_buffer.len() >= 0
+        self.input_buffer.starts_with("sk-") && self.input_buffer.len() >= 32
     }
 
     /// Set running to false to quit the application.
