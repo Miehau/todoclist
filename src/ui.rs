@@ -33,7 +33,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         );
 
         // Input field
-        let input = Paragraph::new(app.input_buffer.as_ref())
+        let input = Paragraph::new(app.input_buffer.as_str())
             .block(
                 Block::bordered()
                     .title(" Your Name ")
