@@ -1,7 +1,7 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use crate::app::App;
 
-pub fn handle_key_events(key_event: KeyEvent, app: &mut App) {
+pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) {
     if !app.onboarding_complete {
         match key_event.code {
             KeyCode::Char(c) => {
@@ -35,7 +35,11 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) {
         KeyCode::Down => {
             app.next();
         }
-        // Insert empty block for whitespace AI!
+        KeyCode::Char(' ') => {
+            if let Err(e) = app.toggle_task_completion().await {
+                eprintln!("Failed to toggle task completion: {}", e);
+            }
+        }
         _ => {}
     }
 }
