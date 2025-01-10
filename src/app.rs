@@ -73,7 +73,7 @@ impl App {
     /// Load tasks from Todoist
     pub async fn load_tasks(&mut self) -> AppResult<()> {
         if let Some(client) = &self.todoist_client {
-            self.tasks = client.get_inbox_tasks().await?;
+            self.tasks = client.get_tasks(Some("today")).await?;
             if self.tasks.is_empty() {
                 println!("Warning: No tasks found - check your API key and Todoist account");
             }
@@ -93,7 +93,7 @@ impl App {
         // Check if it's time to refresh
         if now - self.last_refresh >= self.refresh_interval {
             if let Some(client) = &self.todoist_client {
-                match client.get_inbox_tasks().await {
+                match client.get_tasks(Some("today")).await {
                     Ok(tasks) => {
                         self.update_tasks(tasks);
                     }

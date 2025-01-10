@@ -35,12 +35,16 @@ impl TodoistClient {
         }
     }
 
-    pub async fn get_inbox_tasks(&self) -> Result<Vec<Task>, Box<dyn Error>> {
-        let response = self.client
+    pub async fn get_tasks(&self, filter: Option<&str>) -> Result<Vec<Task>, Box<dyn Error>> {
+        let mut request = self.client
             .get("https://api.todoist.com/rest/v2/tasks")
-            .header("Authorization", format!("Bearer {}", self.api_key))
-            .send()
-            .await?;
+            .header("Authorization", format!("Bearer {}", self.api_key));
+
+        if let Some(filter) = filter {
+            request = request.query(&[("filter", filter)]);
+        }
+
+        let response = request.send().await?;
 
         // Check if the request was successful
         if !response.status().is_success() {
