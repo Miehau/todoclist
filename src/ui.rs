@@ -98,33 +98,10 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Percentage(30),  // Today list
-            Constraint::Percentage(70),  // Inbox list
+            Constraint::Percentage(70),  // Today list
+            Constraint::Percentage(30),  // Inbox list
         ])
         .split(frame.area());
-
-    // Create Today list
-    let inbox_items: Vec<ListItem> = if app.tasks.is_empty() {
-        vec![ListItem::new("No tasks in Inbox")]
-    } else {
-        app.tasks
-            .iter()
-            .map(|task| {
-                let content = if task.is_completed {
-                    format!("✓ {}", task.content)
-                } else {
-                    format!("☐ {}", task.content)
-                };
-                ListItem::new(content)
-            })
-            .collect()
-    };
-
-    let inbox_list = List::new(inbox_items)
-        .block(Block::bordered().title("Inbox"))
-        .style(Style::default().fg(Color::White))
-        .highlight_style(Style::default().bg(Color::DarkGray))
-        .highlight_symbol(">> ");
 
     // Create Today list
     let today_items: Vec<ListItem> = if app.today_tasks.is_empty() {
