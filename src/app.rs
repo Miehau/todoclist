@@ -25,6 +25,8 @@ pub struct App {
     pub todoist_client: Option<TodoistClient>,
     /// Tasks from Todoist
     pub tasks: Vec<Task>,
+    /// Pending changes to sync
+    pub pending_changes: Vec<PendingChange>,
     pub refresh_interval: u64,
     last_refresh: u64,
 }

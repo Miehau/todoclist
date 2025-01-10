@@ -1,13 +1,18 @@
 use serde::Deserialize;
 use std::error::Error;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Task {
     pub id: String,
     pub content: String,
     pub description: String,
     pub is_completed: bool,
     pub due: Option<DueDate>,
+}
+
+#[derive(Debug)]
+pub enum PendingChange {
+    TaskCompletion { task_id: String, completed: bool },
 }
 
 #[derive(Debug, Deserialize)]
