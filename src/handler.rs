@@ -36,12 +36,18 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) {
             app.next();
         }
         KeyCode::Left => {
-            app.list_state.select(Some(0));
-            app.today_list_state.select(None);
+            // Move to Today list
+            if app.today_list_state.selected().is_none() && !app.today_tasks.is_empty() {
+                app.today_list_state.select(Some(0));
+            }
+            app.list_state.select(None);
         }
         KeyCode::Right => {
-            app.list_state.select(None);
-            app.today_list_state.select(Some(0));
+            // Move to Inbox list
+            if app.list_state.selected().is_none() && !app.tasks.is_empty() {
+                app.list_state.select(Some(0));
+            }
+            app.today_list_state.select(None);
         }
         KeyCode::Char(' ') => {
             // correct the syntax AI?

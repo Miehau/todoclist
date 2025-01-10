@@ -70,6 +70,14 @@ impl App {
                 app.refresh_interval = config.refresh_interval()
             }
         }
+        
+        // Set initial selection to Today list if there are tasks
+        if !app.today_tasks.is_empty() {
+            app.today_list_state.select(Some(0));
+        } else if !app.tasks.is_empty() {
+            app.list_state.select(Some(0));
+        }
+        
         app
     }
 
