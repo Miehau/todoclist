@@ -35,6 +35,14 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) {
         KeyCode::Down => {
             app.next();
         }
+        KeyCode::Left => {
+            app.list_state.select(Some(0));
+            app.today_list_state.select(None);
+        }
+        KeyCode::Right => {
+            app.list_state.select(None);
+            app.today_list_state.select(Some(0));
+        }
         KeyCode::Char(' ') => {
             // correct the syntax AI?
             let client = app.todoist_client.as_ref().unwrap();

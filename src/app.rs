@@ -13,6 +13,7 @@ pub struct App {
     /// counter
     pub counter: u8,
     pub list_state: ListState,
+    pub today_list_state: ListState,
     /// Is onboarding complete?
     pub onboarding_complete: bool,
     /// Input buffer for onboarding
@@ -37,6 +38,7 @@ impl Default for App {
             running: true,
             counter: 0,
             list_state: ListState::default(),
+            today_list_state: ListState::default(),
             onboarding_complete: false,
             input_buffer: String::new(),
             api_key: None,
@@ -155,30 +157,82 @@ impl App {
     }
 
     pub fn next(&mut self) {
-        let i = match self.list_state.selected() {
-            Some(i) => {
-                if i >= self.tasks.len().saturating_sub(1) {
-                    0
-                } else {
-                    i + 1
+        if self.list_state.selected().is_some() {
+            let i = match self.list_state.selected() {
+                Some(i) => {
+                    if i >= self.tasks.len().saturating_sub(1) {
+                        0
+                    } else {
+                        i + 1
+                    }
                 }
-            }
-            None => 0,
-        };
-        self.list_state.select(Some(i));
+                None => 0,
+            };
+            self.list_state.select(Some(i));
+        } else {
+            let today_tasks_count = self.tasks.iter()
+                .filter(|task| {
+                    if let Some(due) = &task.due {
+                        let today = chrono::Local::now().date_naive();
+                        let task_date = chrono::NaiveDate::parse_from_str(&due.date, "%Y-%m-%d").ok();
+                        task_date == Some(today)
+                    } else {
+                        false
+                    }
+                })
+                .count();
+                
+            let i = match self.today_list_state.selected() {
+                Some(i) => {
+                    if i >= today_tasks_count.saturating_sub(1) {
+                        0
+                    } else {
+                        i + 1
+                    }
+                }
+                None => 0,
+            };
+            self.today_list_state.select(Some(i));
+        }
     }
 
     pub fn previous(&mut self) {
-        let i = match self.list_state.selected() {
-            Some(i) => {
-                if i == 0 {
-                    self.tasks.len().saturating_sub(1)
-                } else {
-                    i - 1
+        if self.list_state.selected().is_some() {
+            let i = match self.list_state.selected() {
+                Some(i) => {
+                    if i == 0 {
+                        self.tasks.len().saturating_sub(1)
+                    } else {
+                        i - 1
+                    }
                 }
-            }
-            None => 0,
-        };
-        self.list_state.select(Some(i));
+                None => 0,
+            };
+            self.list_state.select(Some(i));
+        } else {
+            let today_tasks_count = self.tasks.iter()
+                .filter(|task| {
+                    if let Some(due) = &task.due {
+                        let today = chrono::Local::now().date_naive();
+                        let task_date = chrono::NaiveDate::parse_from_str(&due.date, "%Y-%m-%d").ok();
+                        task_date == Some(today)
+                    } else {
+                        false
+                    }
+                })
+                .count();
+                
+            let i = match self.today_list_state.selected() {
+                Some(i) => {
+                    if i == 0 {
+                        today_tasks_count.saturating_sub(1)
+                    } else {
+                        i - 1
+                    }
+                }
+                None => 0,
+            };
+            self.today_list_state.select(Some(i));
+        }
     }
 }

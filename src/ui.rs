@@ -118,21 +118,60 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .highlight_symbol(">> ");
 
     let layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(70),  // Main tasks list
+            Constraint::Percentage(30),  // Today list
+        ])
+        .split(frame.area());
+
+    let vertical_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(3),  // For instructions
             Constraint::Min(3),     // For list
         ])
-        .split(frame.area());
+        .split(layout[0]);
 
     // Render instructions
     frame.render_widget(
         Paragraph::new("Use ↑/↓ to navigate\nPress q to quit")
             .block(Block::bordered())
             .alignment(Alignment::Center),
-        layout[0],
+        vertical_layout[0],
     );
 
-    // Render list with state
-    frame.render_stateful_widget(list, layout[1], &mut app.list_state);
+    // Render main list with state
+    frame.render_stateful_widget(list, vertical_layout[1], &mut app.list_state);
+
+    // Filter tasks for today
+    let today_tasks: Vec<ListItem> = app.tasks.iter()
+        .filter(|task| {
+            if let Some(due) = &task.due {
+                let today = chrono::Local::now().date_naive();
+                let task_date = chrono::NaiveDate::parse_from_str(&due.date, "%Y-%m-%d").ok();
+                task_date == Some(today)
+            } else {
+                false
+            }
+        })
+        .map(|task| {
+            let content = if task.is_completed {
+                format!("✓ {}", task.content)
+            } else {
+                format!("☐ {}", task.content)
+            };
+            ListItem::new(content)
+        })
+        .collect();
+
+    // Create today list
+    let today_list = List::new(today_tasks)
+        .block(Block::bordered().title("Today"))
+        .style(Style::default().fg(Color::White))
+        .highlight_style(Style::default().bg(Color::DarkGray))
+        .highlight_symbol(">> ");
+
+    // Render today list
+    frame.render_stateful_widget(today_list, layout[1], &mut app.today_list_state);
 }
