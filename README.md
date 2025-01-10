@@ -1,6 +1,18 @@
-## Simple Async template
+## Todoist TUI
 
-This simple async template will create the following project structure:
+A terminal-based Todoist client with the following features:
+
+- View and manage tasks from Todoist
+- Toggle task completion status
+- Separate views for Today's tasks and Inbox
+- API key onboarding flow
+- Keyboard navigation:
+  - Up/Down: Navigate tasks
+  - Left/Right: Switch between Today and Inbox views
+  - Space: Toggle task completion
+  - Q: Quit
+
+### Project Structure
 
 ```text
 src/
@@ -13,10 +25,26 @@ src/
 └── ui.rs      -> renders the widgets / UI
 ```
 
-This is identical to the [simple] template but has `async` events out of the box with `tokio` and
-`crossterm`'s `EventStream`.
+### Requirements
 
-[simple](../simple/)
+- Rust 1.65+
+- Todoist API key
+
+### Installation
+
+```bash
+cargo install --path .
+```
+
+### Configuration
+
+On first run, you'll be prompted to enter your Todoist API key. This will be securely stored in your system's config directory.
+
+### Running
+
+```bash
+todoclist
+```
 
 Here's a `diff` if you use as reference if want to convert your own code to `async`:
 
