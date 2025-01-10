@@ -93,6 +93,15 @@ impl App {
             self.tasks = inbox_tasks;
             self.today_tasks = today_tasks;
             
+            // Set initial selection to Today list if there are tasks
+            if !self.today_tasks.is_empty() {
+                self.today_list_state.select(Some(0));
+                self.list_state.select(None);
+            } else if !self.tasks.is_empty() {
+                self.list_state.select(Some(0));
+                self.today_list_state.select(None);
+            }
+            
             if self.tasks.is_empty() && self.today_tasks.is_empty() {
                 println!("Warning: No tasks found - check your API key and Todoist account");
             }
@@ -166,12 +175,13 @@ impl App {
         }
         self.today_tasks = merged_today;
         
-        // Preserve selections if possible
-        if self.list_state.selected().is_none() && !self.tasks.is_empty() {
-            self.list_state.select(Some(0));
-        }
-        if self.today_list_state.selected().is_none() && !self.today_tasks.is_empty() {
+        // Reset selections and prioritize Today list
+        if !self.today_tasks.is_empty() {
             self.today_list_state.select(Some(0));
+            self.list_state.select(None);
+        } else if !self.tasks.is_empty() {
+            self.list_state.select(Some(0));
+            self.today_list_state.select(None);
         }
     }
 
