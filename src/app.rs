@@ -47,6 +47,7 @@ impl Default for App {
             api_key_manager: ApiKeyManager::new(),
             todoist_client: None,
             tasks: Vec::new(),
+            today_tasks: Vec::new(),
             refresh_interval: 10, // Default to 10 seconds
             last_refresh: 0,
             pending_changes: Vec::new(),
