@@ -9,7 +9,8 @@ A terminal-based Todoist client with the following features:
 
 ## Roadmap
 
-- [ ] Synchronise tasks from local to cloud
+- [X] Synchronise tasks from local to cloud
+- [ ] Share tasks between Today and Inbox
 - [ ] Display more information (e.g. details/ priority/ date)
 - [ ] Add tasks
 - [ ] Add tests
