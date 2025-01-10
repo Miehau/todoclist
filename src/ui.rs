@@ -126,6 +126,29 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .highlight_style(Style::default().bg(Color::DarkGray))
         .highlight_symbol(">> ");
 
+    // Create Today list
+    let today_items: Vec<ListItem> = if app.today_tasks.is_empty() {
+        vec![ListItem::new("No tasks for Today")]
+    } else {
+        app.today_tasks
+            .iter()
+            .map(|task| {
+                let content = if task.is_completed {
+                    format!("✓ {}", task.content)
+                } else {
+                    format!("☐ {}", task.content)
+                };
+                ListItem::new(content)
+            })
+            .collect()
+    };
+
+    let today_list = List::new(today_items)
+        .block(Block::bordered().title("Today"))
+        .style(Style::default().fg(Color::White))
+        .highlight_style(Style::default().bg(Color::DarkGray))
+        .highlight_symbol(">> ");
+
     // Create Inbox list
     let inbox_items: Vec<ListItem> = if app.tasks.is_empty() {
         vec![ListItem::new("No tasks in Inbox")]
