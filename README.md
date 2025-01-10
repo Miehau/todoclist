@@ -1,3 +1,6 @@
+# Make it center AI! 
+<img height="120px" src="assets/logo.png" alt="Logo looking like a purple ticked todo item">
+
 ## Todoist TUI
 
 A terminal-based Todoist client with the following features:
