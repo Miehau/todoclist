@@ -37,7 +37,7 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) {
         }
         KeyCode::Left => {
             // Move to Today list
-            if app.today_list_state.selected().is_none() && !app.today_tasks.is_empty() {
+            if app.today_list_state.selected().is_none() && !app.today_tasks().is_empty() {
                 app.today_list_state.select(Some(0));
             }
             app.list_state.select(None);

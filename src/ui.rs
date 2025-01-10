@@ -104,10 +104,10 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .split(frame.area());
 
     // Create Today list
-    let today_items: Vec<ListItem> = if app.today_tasks.is_empty() {
+    let today_items: Vec<ListItem> = if app.today_tasks().is_empty() {
         vec![ListItem::new("No tasks for Today")]
     } else {
-        app.today_tasks
+        app.today_tasks()
             .iter()
             .map(|task| {
                 let content = if task.is_completed {

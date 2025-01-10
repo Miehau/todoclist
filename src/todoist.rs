@@ -7,6 +7,7 @@ pub struct Task {
     pub content: String,
     pub description: String,
     pub is_completed: bool,
+    pub labels: Vec<String>,
     pub due: Option<DueDate>,
 }
 

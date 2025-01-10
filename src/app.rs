@@ -26,8 +26,6 @@ pub struct App {
     pub todoist_client: Option<TodoistClient>,
     /// Inbox tasks from Todoist
     pub tasks: Vec<Task>,
-    /// Today's tasks from Todoist
-    pub today_tasks: Vec<Task>,
     /// Pending changes to sync
     pub pending_changes: Vec<PendingChange>,
     pub refresh_interval: u64,
@@ -47,7 +45,6 @@ impl Default for App {
             api_key_manager: ApiKeyManager::new(),
             todoist_client: None,
             tasks: Vec::new(),
-            today_tasks: Vec::new(),
             refresh_interval: 10, // Default to 10 seconds
             last_refresh: 0,
             pending_changes: Vec::new(),
@@ -72,7 +69,7 @@ impl App {
         }
         
         // Set initial selection to Today list if there are tasks
-        if !app.today_tasks.is_empty() {
+        if !app.today_tasks().is_empty() {
             app.today_list_state.select(Some(0));
         } else if !app.tasks.is_empty() {
             app.list_state.select(Some(0));
@@ -81,32 +78,33 @@ impl App {
         app
     }
 
+    pub fn today_tasks(&self) -> Vec<&Task> {
+        self.tasks.iter().filter(|task| {
+            if let Some(due) = &task.due {
+                due.date == chrono::Local::now().date_naive().to_string()
+            } else {
+                false
+            }
+        }).collect()
+    }
+
     /// Load tasks from Todoist
     pub async fn load_tasks(&mut self) -> AppResult<()> {
         if let Some(client) = &self.todoist_client {
             // Get Inbox tasks (no filter)
             let inbox_tasks = client.get_tasks(None).await?;
-            // Get Today tasks
-            let today_tasks = client.get_tasks(Some("today")).await?;
-            
+
             // Store both sets of tasks
             self.tasks = inbox_tasks;
-            self.today_tasks = today_tasks;
-            
+
             // Set initial selection to Today list if there are tasks
-            if !self.today_tasks.is_empty() {
+            if !self.today_tasks().is_empty() {
                 self.today_list_state.select(Some(0));
                 self.list_state.select(None);
             } else if !self.tasks.is_empty() {
                 self.list_state.select(Some(0));
                 self.today_list_state.select(None);
             }
-            
-            if self.tasks.is_empty() && self.today_tasks.is_empty() {
-                println!("Warning: No tasks found - check your API key and Todoist account");
-            }
-        } else {
-            println!("Warning: No Todoist client available");
         }
         Ok(())
     }
@@ -158,7 +156,7 @@ impl App {
 
         // Update Today tasks
         let mut existing_today = std::collections::HashMap::new();
-        for task in &self.today_tasks {
+        for &mut task in &mut self.today_tasks() {
             existing_today.insert(&task.id, task);
         }
 
@@ -172,16 +170,6 @@ impl App {
             } else {
                 merged_today.push(new_task);
             }
-        }
-        self.today_tasks = merged_today;
-        
-        // Reset selections and prioritize Today list
-        if !self.today_tasks.is_empty() {
-            self.today_list_state.select(Some(0));
-            self.list_state.select(None);
-        } else if !self.tasks.is_empty() {
-            self.list_state.select(Some(0));
-            self.today_list_state.select(None);
         }
     }
 
