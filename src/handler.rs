@@ -1,5 +1,5 @@
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use crate::app::App;
+use crossterm::event::{KeyCode, KeyEvent};
 
 pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) {
     if !app.onboarding_complete {
@@ -55,7 +55,7 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) {
                     task.is_completed = !task.is_completed;
                     // TODO: Add API call to sync completion status with Todoist
                     if let Some(client) = &app.todoist_client {
-                        // client.update_task_completion(task.id, task.is_completed).await?;
+                        client.update_task_completion(&task.id, task.is_completed).await?;
                     }
                 }
             }

@@ -28,6 +28,12 @@ pub struct TodoistClient {
 }
 
 impl TodoistClient {
+    pub(crate) async fn update_task_completion(&self, p0: &String, p1: bool) {
+    //     implement AI!
+    }
+}
+
+impl TodoistClient {
     pub fn new(api_key: String) -> Self {
         Self {
             api_key,
