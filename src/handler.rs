@@ -35,6 +35,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) {
         KeyCode::Down => {
             app.next();
         }
+        // Insert empty block for whitespace AI!
         _ => {}
     }
 }
