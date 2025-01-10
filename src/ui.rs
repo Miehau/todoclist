@@ -1,7 +1,7 @@
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout},
-    style::{Color, Style, Stylize},
-    widgets::{Block, BorderType, List, ListItem, Paragraph, Wrap},
+    style::{Color, Style},
+    widgets::{Block, List, ListItem, Paragraph},
     Frame,
 };
 
@@ -16,7 +16,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                 Constraint::Length(3),
                 Constraint::Length(3),
             ])
-            .split(frame.size());
+            .split(frame.area());
 
         // Title
         frame.render_widget(
@@ -123,7 +123,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             Constraint::Length(3),  // For instructions
             Constraint::Min(3),     // For list
         ])
-        .split(frame.size());
+        .split(frame.area());
 
     // Render instructions
     frame.render_widget(

@@ -36,8 +36,11 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) {
             app.next();
         }
         KeyCode::Char(' ') => {
-            if let Err(e) = app.toggle_task_completion().await {
-                eprintln!("Failed to toggle task completion: {}", e);
+            // correct the syntax AI?
+            let client = app.todoist_client.as_ref().unwrap();
+            if let Some(task) = app.list_state.selected() {
+                let task = app.tasks.get_mut(task).unwrap();
+                task.is_completed = !task.is_completed;
             }
         }
         _ => {}
