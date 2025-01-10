@@ -144,17 +144,8 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     // Render main list with state
     frame.render_stateful_widget(list, vertical_layout[1], &mut app.list_state);
 
-    // Filter tasks for today
+    // Create today list using all tasks (since they're already filtered by API)
     let today_tasks: Vec<ListItem> = app.tasks.iter()
-        .filter(|task| {
-            if let Some(due) = &task.due {
-                let today = chrono::Local::now().date_naive();
-                let task_date = chrono::NaiveDate::parse_from_str(&due.date, "%Y-%m-%d").ok();
-                task_date == Some(today)
-            } else {
-                false
-            }
-        })
         .map(|task| {
             let content = if task.is_completed {
                 format!("✓ {}", task.content)
@@ -165,7 +156,6 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         })
         .collect();
 
-    // Create today list
     let today_list = List::new(today_tasks)
         .block(Block::bordered().title("Today"))
         .style(Style::default().fg(Color::White))
