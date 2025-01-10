@@ -94,9 +94,18 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         return;
     }
 
-    // If no tasks, show a placeholder
-    let items: Vec<ListItem> = if app.tasks.is_empty() {
-        vec![ListItem::new("No tasks found")]
+    // Create layout
+    let layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(70),  // Inbox list
+            Constraint::Percentage(30),  // Today list
+        ])
+        .split(frame.area());
+
+    // Create Inbox list
+    let inbox_items: Vec<ListItem> = if app.tasks.is_empty() {
+        vec![ListItem::new("No tasks in Inbox")]
     } else {
         app.tasks
             .iter()
@@ -111,57 +120,36 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             .collect()
     };
 
-    let list = List::new(items)
-        .block(Block::bordered().title("Navigation List"))
+    let inbox_list = List::new(inbox_items)
+        .block(Block::bordered().title("Inbox"))
         .style(Style::default().fg(Color::White))
         .highlight_style(Style::default().bg(Color::DarkGray))
         .highlight_symbol(">> ");
 
-    let layout = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(70),  // Main tasks list
-            Constraint::Percentage(30),  // Today list
-        ])
-        .split(frame.area());
+    // Create Today list
+    let today_items: Vec<ListItem> = if app.today_tasks.is_empty() {
+        vec![ListItem::new("No tasks for Today")]
+    } else {
+        app.today_tasks
+            .iter()
+            .map(|task| {
+                let content = if task.is_completed {
+                    format!("✓ {}", task.content)
+                } else {
+                    format!("☐ {}", task.content)
+                };
+                ListItem::new(content)
+            })
+            .collect()
+    };
 
-    let vertical_layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(3),  // For instructions
-            Constraint::Min(3),     // For list
-        ])
-        .split(layout[0]);
-
-    // Render instructions
-    frame.render_widget(
-        Paragraph::new("Use ↑/↓ to navigate\nPress q to quit")
-            .block(Block::bordered())
-            .alignment(Alignment::Center),
-        vertical_layout[0],
-    );
-
-    // Render main list with state
-    frame.render_stateful_widget(list, vertical_layout[1], &mut app.list_state);
-
-    // Create today list using all tasks (since they're already filtered by API)
-    let today_tasks: Vec<ListItem> = app.tasks.iter()
-        .map(|task| {
-            let content = if task.is_completed {
-                format!("✓ {}", task.content)
-            } else {
-                format!("☐ {}", task.content)
-            };
-            ListItem::new(content)
-        })
-        .collect();
-
-    let today_list = List::new(today_tasks)
+    let today_list = List::new(today_items)
         .block(Block::bordered().title("Today"))
         .style(Style::default().fg(Color::White))
         .highlight_style(Style::default().bg(Color::DarkGray))
         .highlight_symbol(">> ");
 
-    // Render today list
+    // Render both lists
+    frame.render_stateful_widget(inbox_list, layout[0], &mut app.list_state);
     frame.render_stateful_widget(today_list, layout[1], &mut app.today_list_state);
 }

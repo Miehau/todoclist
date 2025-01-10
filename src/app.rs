@@ -24,8 +24,10 @@ pub struct App {
     pub api_key_manager: ApiKeyManager,
     /// Todoist client
     pub todoist_client: Option<TodoistClient>,
-    /// Tasks from Todoist
+    /// Inbox tasks from Todoist
     pub tasks: Vec<Task>,
+    /// Today's tasks from Todoist
+    pub today_tasks: Vec<Task>,
     /// Pending changes to sync
     pub pending_changes: Vec<PendingChange>,
     pub refresh_interval: u64,
@@ -73,8 +75,16 @@ impl App {
     /// Load tasks from Todoist
     pub async fn load_tasks(&mut self) -> AppResult<()> {
         if let Some(client) = &self.todoist_client {
-            self.tasks = client.get_tasks(Some("today")).await?;
-            if self.tasks.is_empty() {
+            // Get Inbox tasks (no filter)
+            let inbox_tasks = client.get_tasks(None).await?;
+            // Get Today tasks
+            let today_tasks = client.get_tasks(Some("today")).await?;
+            
+            // Store both sets of tasks
+            self.tasks = inbox_tasks;
+            self.today_tasks = today_tasks;
+            
+            if self.tasks.is_empty() && self.today_tasks.is_empty() {
                 println!("Warning: No tasks found - check your API key and Todoist account");
             }
         } else {
@@ -93,9 +103,12 @@ impl App {
         // Check if it's time to refresh
         if now - self.last_refresh >= self.refresh_interval {
             if let Some(client) = &self.todoist_client {
-                match client.get_tasks(Some("today")).await {
-                    Ok(tasks) => {
-                        self.update_tasks(tasks);
+                match tokio::try_join!(
+                    client.get_tasks(None),
+                    client.get_tasks(Some("today"))
+                ) {
+                    Ok((inbox_tasks, today_tasks)) => {
+                        self.update_tasks(inbox_tasks, today_tasks);
                     }
                     Err(e) => eprintln!("Failed to refresh tasks: {}", e),
                 }
@@ -105,33 +118,51 @@ impl App {
     }
 
     /// Update tasks list from async refresh
-    fn update_tasks(&mut self, new_tasks: Vec<Task>) {
-        // Create a map of existing tasks by ID
-        let mut existing_tasks = std::collections::HashMap::new();
+    fn update_tasks(&mut self, new_inbox_tasks: Vec<Task>, new_today_tasks: Vec<Task>) {
+        // Update Inbox tasks
+        let mut existing_inbox = std::collections::HashMap::new();
         for task in &self.tasks {
-            existing_tasks.insert(&task.id, task);
+            existing_inbox.insert(&task.id, task);
         }
 
-        // Merge new tasks while preserving completion status
-        let mut merged_tasks = Vec::new();
-        for new_task in new_tasks {
-            if let Some(existing) = existing_tasks.get(&new_task.id) {
-                // Preserve completion status from existing task
-                merged_tasks.push(Task {
+        let mut merged_inbox = Vec::new();
+        for new_task in new_inbox_tasks {
+            if let Some(existing) = existing_inbox.get(&new_task.id) {
+                merged_inbox.push(Task {
                     is_completed: existing.is_completed,
                     ..new_task
                 });
             } else {
-                // New task
-                merged_tasks.push(new_task);
+                merged_inbox.push(new_task);
             }
         }
+        self.tasks = merged_inbox;
 
-        self.tasks = merged_tasks;
+        // Update Today tasks
+        let mut existing_today = std::collections::HashMap::new();
+        for task in &self.today_tasks {
+            existing_today.insert(&task.id, task);
+        }
+
+        let mut merged_today = Vec::new();
+        for new_task in new_today_tasks {
+            if let Some(existing) = existing_today.get(&new_task.id) {
+                merged_today.push(Task {
+                    is_completed: existing.is_completed,
+                    ..new_task
+                });
+            } else {
+                merged_today.push(new_task);
+            }
+        }
+        self.today_tasks = merged_today;
         
-        // Preserve selection if possible
+        // Preserve selections if possible
         if self.list_state.selected().is_none() && !self.tasks.is_empty() {
             self.list_state.select(Some(0));
+        }
+        if self.today_list_state.selected().is_none() && !self.today_tasks.is_empty() {
+            self.today_list_state.select(Some(0));
         }
     }
 
