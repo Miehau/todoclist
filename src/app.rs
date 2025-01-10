@@ -1,7 +1,7 @@
 use std::{error, time::{SystemTime, UNIX_EPOCH}};
 use ratatui::widgets::ListState;
 use crate::config::ApiKeyManager;
-use crate::todoist::{TodoistClient, Task};
+use crate::todoist::{TodoistClient, Task, PendingChange};
 
 /// Application result type.
 pub type AppResult<T> = Result<T, Box<dyn error::Error>>;
