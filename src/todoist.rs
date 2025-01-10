@@ -28,8 +28,41 @@ pub struct TodoistClient {
 }
 
 impl TodoistClient {
-    pub(crate) async fn update_task_completion(&self, p0: &String, p1: bool) {
-    //     implement AI!
+    pub(crate) async fn update_task_completion(&self, task_id: &String, completed: bool) -> Result<(), Box<dyn Error>> {
+        let endpoint = format!("https://api.todoist.com/rest/v2/tasks/{}/close", task_id);
+        
+        if completed {
+            // Close the task
+            let response = self.client
+                .post(&endpoint)
+                .header("Authorization", format!("Bearer {}", self.api_key))
+                .send()
+                .await?;
+            
+            if !response.status().is_success() {
+                let status = response.status();
+                let error_body = response.text().await?;
+                eprintln!("Failed to close task: {} - {}", status, error_body);
+                return Err(format!("API request failed: {}", status).into());
+            }
+        } else {
+            // Reopen the task
+            let endpoint = format!("https://api.todoist.com/rest/v2/tasks/{}/reopen", task_id);
+            let response = self.client
+                .post(&endpoint)
+                .header("Authorization", format!("Bearer {}", self.api_key))
+                .send()
+                .await?;
+            
+            if !response.status().is_success() {
+                let status = response.status();
+                let error_body = response.text().await?;
+                eprintln!("Failed to reopen task: {} - {}", status, error_body);
+                return Err(format!("API request failed: {}", status).into());
+            }
+        }
+        
+        Ok(())
     }
 }
 

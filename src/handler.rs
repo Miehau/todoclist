@@ -55,7 +55,9 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) {
                     task.is_completed = !task.is_completed;
                     // TODO: Add API call to sync completion status with Todoist
                     if let Some(client) = &app.todoist_client {
-                        client.update_task_completion(&task.id, task.is_completed).await?;
+                        if let Err(e) = client.update_task_completion(&task.id, task.is_completed).await {
+                            eprintln!("Failed to sync task completion: {}", e);
+                        }
                     }
                 }
             }
