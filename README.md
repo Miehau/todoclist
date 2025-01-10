@@ -1,5 +1,7 @@
-# Make it center AI! 
-<img height="120px" src="assets/logo.png" alt="Logo looking like a purple ticked todo item">
+<h1 align="center">
+  <img height="120px" src="assets/logo.png" alt="Logo looking like a purple ticked todo item"><br>
+  Todoist TUI
+</h1>
 
 ## Todoist TUI
 
