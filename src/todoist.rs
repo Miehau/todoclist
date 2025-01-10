@@ -15,7 +15,7 @@ pub enum PendingChange {
     TaskCompletion { task_id: String, completed: bool },
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct DueDate {
     pub string: String,
     pub date: String,
