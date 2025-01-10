@@ -47,6 +47,7 @@ impl Default for App {
             tasks: Vec::new(),
             refresh_interval: 10, // Default to 10 seconds
             last_refresh: 0,
+            pending_changes: Vec::new(),
         }
     }
 }
