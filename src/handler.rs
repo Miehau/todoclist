@@ -50,11 +50,14 @@ pub async fn handle_key_events(key_event: KeyEvent, app: &mut App) {
             app.today_list_state.select(None);
         }
         KeyCode::Char(' ') => {
-            // correct the syntax AI?
-            let client = app.todoist_client.as_ref().unwrap();
-            if let Some(task) = app.list_state.selected() {
-                let task = app.tasks.get_mut(task).unwrap();
-                task.is_completed = !task.is_completed;
+            if let Some(task_index) = app.list_state.selected() {
+                if let Some(task) = app.tasks.get_mut(task_index) {
+                    task.is_completed = !task.is_completed;
+                    // TODO: Add API call to sync completion status with Todoist
+                    if let Some(client) = &app.todoist_client {
+                        // client.update_task_completion(task.id, task.is_completed).await?;
+                    }
+                }
             }
         }
         _ => {}
