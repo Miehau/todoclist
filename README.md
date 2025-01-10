@@ -1,9 +1,7 @@
 <h1 align="center">
   <img height="120px" src="assets/logo.png" alt="Logo looking like a purple ticked todo item"><br>
-  Todoist TUI
+  Todoclist
 </h1>
-
-## Todoist
 
 A terminal-based Todoist client with the following features:
 
