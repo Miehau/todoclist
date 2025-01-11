@@ -110,10 +110,11 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         app.today_tasks()
             .iter()
             .map(|task| {
-                let content = if task.is_completed {
-                    format!("✓ {}", task.content)
+                let status_symbol = if task.is_completed { "✓" } else { "☐" };
+                let content = if let Some(due) = &task.due {
+                    format!("{} {} ({})", status_symbol, task.content, due.date)
                 } else {
-                    format!("☐ {}", task.content)
+                    format!("{} {}", status_symbol, task.content)
                 };
                 ListItem::new(content)
             })
@@ -133,10 +134,11 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         app.tasks
             .iter()
             .map(|task| {
-                let content = if task.is_completed {
-                    format!("✓ {}", task.content)
+                let status_symbol = if task.is_completed { "✓" } else { "☐" };
+                let content = if let Some(due) = &task.due {
+                    format!("{} {} ({})", status_symbol, task.content, due.date)
                 } else {
-                    format!("☐ {}", task.content)
+                    format!("{} {}", status_symbol, task.content)
                 };
                 ListItem::new(content)
             })
