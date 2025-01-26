@@ -26,7 +26,7 @@ pub struct Config {
 
 impl Config {
     pub fn refresh_interval(&self) -> u64 {
-        self.refresh_interval.unwrap_or(10)
+        self.refresh_interval.unwrap_or(30)
     }
 }
 

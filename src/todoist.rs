@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use std::error::Error;
+use std::time::Duration;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Task {
@@ -16,6 +17,17 @@ pub enum PendingChange {
     TaskCompletion { task_id: String, completed: bool },
 }
 
+impl Clone for PendingChange {
+    fn clone(&self) -> Self {
+        match &self {
+            PendingChange::TaskCompletion { task_id, completed } => PendingChange::TaskCompletion {
+                task_id: task_id.clone(),
+                completed: completed.clone(),
+            },
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Clone)]
 pub struct DueDate {
     pub string: String,
@@ -28,18 +40,26 @@ pub struct TodoistClient {
     client: reqwest::Client,
 }
 
+unsafe impl Send for TodoistClient {}
+unsafe impl Sync for TodoistClient {}
+
 impl TodoistClient {
-    pub(crate) async fn update_task_completion(&self, task_id: &String, completed: bool) -> Result<(), Box<dyn Error>> {
+    pub(crate) async fn update_task_completion(
+        &self,
+        task_id: &String,
+        completed: bool,
+    ) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
         let endpoint = format!("https://api.todoist.com/rest/v2/tasks/{}/close", task_id);
-        
+
         if completed {
             // Close the task
-            let response = self.client
+            let response = self
+                .client
                 .post(&endpoint)
                 .header("Authorization", format!("Bearer {}", self.api_key))
                 .send()
                 .await?;
-            
+
             if !response.status().is_success() {
                 let status = response.status();
                 let error_body = response.text().await?;
@@ -49,12 +69,13 @@ impl TodoistClient {
         } else {
             // Reopen the task
             let endpoint = format!("https://api.todoist.com/rest/v2/tasks/{}/reopen", task_id);
-            let response = self.client
+            let response = self
+                .client
                 .post(&endpoint)
                 .header("Authorization", format!("Bearer {}", self.api_key))
                 .send()
                 .await?;
-            
+
             if !response.status().is_success() {
                 let status = response.status();
                 let error_body = response.text().await?;
@@ -62,7 +83,7 @@ impl TodoistClient {
                 return Err(format!("API request failed: {}", status).into());
             }
         }
-        
+
         Ok(())
     }
 }
@@ -71,12 +92,19 @@ impl TodoistClient {
     pub fn new(api_key: String) -> Self {
         Self {
             api_key,
-            client: reqwest::Client::new(),
+            client: reqwest::Client::builder()
+                .timeout(Duration::from_secs(10))
+                .build()
+                .expect("Failed to create HTTP client"),
         }
     }
 
-    pub async fn get_tasks(&self, filter: Option<&str>) -> Result<Vec<Task>, Box<dyn Error>> {
-        let mut request = self.client
+    pub async fn get_tasks(
+        &self,
+        filter: Option<&str>,
+    ) -> Result<Vec<Task>, Box<dyn Error + Send + Sync + 'static>> {
+        let mut request = self
+            .client
             .get("https://api.todoist.com/rest/v2/tasks")
             .header("Authorization", format!("Bearer {}", self.api_key));
 

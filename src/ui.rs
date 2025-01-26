@@ -109,6 +109,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     } else {
         app.today_tasks()
             .iter()
+            .filter(|task| !task.is_completed)
             .map(|task| {
                 let status_symbol = if task.is_completed { "✓" } else { "☐" };
                 let content = if let Some(due) = &task.due {
@@ -133,6 +134,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     } else {
         app.tasks
             .iter()
+            .filter(|task| !task.is_completed)
             .map(|task| {
                 let status_symbol = if task.is_completed { "✓" } else { "☐" };
                 let content = if let Some(due) = &task.due {

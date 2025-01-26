@@ -11,6 +11,7 @@ A terminal-based Todoist client with the following features:
 
 - [X] Synchronise tasks from local to cloud
 - [X] Share tasks between Today and Inbox
+- [X] Run async and update status in the background
 - [ ] Display more information (e.g. details/ priority/ date)
 - [ ] Add tasks
 - [ ] Add tests
